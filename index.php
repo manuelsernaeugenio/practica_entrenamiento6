@@ -16,27 +16,40 @@
 <body>
     <?php
 
+    /***********************************************
+    Función que valida el nombre y el apellid con un custom callback.    
+     */
     function validarString($dato)
     {
         if (mb_strlen($dato, 'UTF-8') <= 0) {
             return false;
         }
 
-        if (count(explode(' ', $dato)) == 0 || count(explode(' ', $dato)) > 2) { // 
+        if (count(explode(' ', $dato)) == 0 || count(explode(' ', $dato)) > 2) {
             return false;
         }
 
         return $dato;
     }
 
+    /*******************************************************
+     * Función para quitar símbolos y carácteres no válidos.
+     */
     function sanitize($post)
     {
         return htmlentities(trim($post));
     }
 
     $imprimirFormulario = true;
+    $datos = [];
+
+    /****************************************************************
+     * Al enviar el post, hacemos las comprobaciones de los campos.    
+     */
 
     if ($_POST) {
+
+        // Le pasaremos este array de opciones a otro array para validar los datos.
         $argumentos = array(
             'nombre' => array(
                 'filter' => FILTER_CALLBACK,
@@ -56,6 +69,7 @@
             )
         );
 
+        // Array que contiene los datos ya validados.
         $datos = [
             'nombre' => sanitize(array_key_exists('nombre', $_POST) ? $_POST['nombre'] : ""),
             'apellidos' => sanitize(array_key_exists('apellidos', $_POST) ? $_POST['apellidos'] : ""),
@@ -65,6 +79,7 @@
 
         $validaciones = filter_var_array($datos, $argumentos);
 
+        // Si todos los datos son válidos, imprimimos los datos y ocultamos el formulario.
         if ($validaciones['nombre'] && $validaciones['apellidos'] && $validaciones['edad'] && $validaciones['altura']) {
             $imprimirFormulario = false;
             echo "<br><span style='color:green;'><b>Nombre</b>: {$_POST['nombre']}</span><br>";
@@ -73,6 +88,8 @@
             echo "<br><span style='color:green;'><b>Altura</b>: {$_POST['altura']}</span><br>";
         }
     }
+
+    // Mostramos el formulario si los datos no son válidos aun junto a sus errores.
     if ($imprimirFormulario) {
     ?>
         <form action="#" method="post">
@@ -87,7 +104,7 @@
                 ?>
             </p>
             <p>
-                <input placeholder="Apellidos" value="<?= array_key_exists('apellidos', $datos) ? $datos['nombre'] : "" ?>" type="text" name="apellidos" id="apellidos">
+                <input placeholder="Apellidos" value="<?= array_key_exists('apellidos', $datos) ? $datos['apellidos'] : "" ?>" type="text" name="apellidos" id="apellidos">
                 <?php
                 if ($_POST) {
                     if ($validaciones['apellidos'] === false) {
